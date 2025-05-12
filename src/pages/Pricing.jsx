@@ -1,9 +1,26 @@
-import React from 'react'
+// Uses the same styles as Product
+import PageNav from "../components/PageNav";
+import styles from "./Product.module.css";
 
-const Pricing = () => {
-    return (
-        <div>Pricing</div>
-    )
+export default function Product() {
+  return (
+    <main className={styles.product}>
+      <PageNav />
+      <section>
+        <div>
+          <h2>
+            Fiyatlandırma
+            <br />
+            99₺/Aylık
+          </h2>
+          <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Vitae vel
+            labore mollitia iusto. Recusandae quos provident, laboriosam fugit
+            voluptatem iste.
+          </p>
+        </div>
+        <img src="img-2.jpg" alt="gökdelenlerin bulunduğu büyük bir şehrin genel görünümü" />
+      </section>
+    </main>
+  );
 }
-
-export default Pricing
