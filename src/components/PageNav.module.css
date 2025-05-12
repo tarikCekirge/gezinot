@@ -1,0 +1,14 @@
+.nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+.nav {
+  background-color: rgb(66, 66, 226);
+}
+
+.nav :global(.active) {
+  background-color: var(--color-brand--2);
+}
