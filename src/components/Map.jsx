@@ -1,6 +1,6 @@
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import styles from './Map.module.css';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useCities } from '../contexts/hooks/useCities';
 
@@ -9,25 +9,37 @@ function ChangeMapCenter({ lat, lng }) {
 
     useEffect(() => {
         if (!isNaN(lat) && !isNaN(lng)) {
-            map.setView([lat, lng], map.getZoom());
+            map.setView([lat, lng]);
         }
     }, [lat, lng, map]);
 
     return null;
 }
 
+function DeleteClick() {
+    const navigate = useNavigate()
+    useMapEvent({
+        click: (e) => {
+            const searchParams = new URLSearchParams(e.latlng);
+            navigate(`form?${searchParams}`)
+        }
+    })
+}
+
 const Map = () => {
-    const [searchParams] = useSearchParams();
     const { cities } = useCities()
 
+    const [searchParams] = useSearchParams();
     const latParam = searchParams.get('lat');
     const lngParam = searchParams.get('lng');
 
-    const lat = Number(latParam);
-    const lng = Number(lngParam);
+    const defaultPosition = [39.9208, 32.8541];
+
+    const lat = Number(latParam || defaultPosition[0]);
+    const lng = Number(lngParam || defaultPosition[1]);
+
 
     const isValidCoords = !isNaN(lat) && !isNaN(lng);
-    const defaultPosition = [39.9208, 32.8541];
     const mapPosition = isValidCoords ? [lat, lng] : defaultPosition;
 
     return (
@@ -54,6 +66,7 @@ const Map = () => {
 
 
                 {isValidCoords && <ChangeMapCenter lat={lat} lng={lng} />}
+                <DeleteClick />
             </MapContainer>
         </div>
     );
