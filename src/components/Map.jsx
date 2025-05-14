@@ -2,6 +2,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import styles from './Map.module.css';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useCities } from '../contexts/hooks/useCities';
 
 function ChangeMapCenter({ lat, lng }) {
     const map = useMap();
@@ -17,6 +18,7 @@ function ChangeMapCenter({ lat, lng }) {
 
 const Map = () => {
     const [searchParams] = useSearchParams();
+    const { cities } = useCities()
 
     const latParam = searchParams.get('lat');
     const lngParam = searchParams.get('lng');
@@ -41,11 +43,15 @@ const Map = () => {
                     url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
                 />
 
-                <Marker position={mapPosition}>
-                    <Popup>
-                        A pretty CSS3 popup. <br /> Easily customizable.
-                    </Popup>
-                </Marker>
+                {cities.map((city) => (
+                    <Marker key={city.id} position={[city.position.lat, city.position.lng]}>
+                        <Popup>
+                            <span>{city.emoji}</span><span>{city.cityName}</span>
+                        </Popup>
+                    </Marker>
+                ))}
+
+
 
                 {isValidCoords && <ChangeMapCenter lat={lat} lng={lng} />}
             </MapContainer>
