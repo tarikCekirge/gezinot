@@ -3,6 +3,9 @@ import styles from './Map.module.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useCities } from '../contexts/hooks/useCities';
+import { useGeolocation } from '../hooks/useGeoLocation';
+import Button from './Button';
+import { useState } from 'react';
 
 function ChangeMapCenter({ lat, lng }) {
     const map = useMap();
@@ -27,23 +30,68 @@ function DeleteClick() {
 }
 
 const Map = () => {
+
+    const defaultPosition = [39.9208, 32.8541];
+    const [mapPosition, setMapPosition] = useState(defaultPosition);
     const { cities } = useCities()
 
     const [searchParams] = useSearchParams();
-    const latParam = searchParams.get('lat');
-    const lngParam = searchParams.get('lng');
+    const { position: geolocationPosition, getPosition, isLoading: isLoadingPosition } = useGeolocation();
 
-    const defaultPosition = [39.9208, 32.8541];
+    const latParam = Number(searchParams.get('lat'));
+    const lngParam = Number(searchParams.get('lng'));
 
-    const lat = Number(latParam || defaultPosition[0]);
-    const lng = Number(lngParam || defaultPosition[1]);
+    const isValidParams =
+        !isNaN(latParam) &&
+        !isNaN(lngParam) &&
+        latParam !== 0 &&
+        lngParam !== 0;
+
+
+    const lat = isValidParams ? latParam : defaultPosition[0];
+    const lng = isValidParams ? lngParam : defaultPosition[1];
+
+    console.log(lat, lng)
 
 
     const isValidCoords = !isNaN(lat) && !isNaN(lng);
-    const mapPosition = isValidCoords ? [lat, lng] : defaultPosition;
+
+    useEffect(() => {
+        const latParam = Number(searchParams.get('lat'));
+        const lngParam = Number(searchParams.get('lng'));
+
+        const isValid = !isNaN(latParam) && !isNaN(lngParam) && latParam !== 0 && lngParam !== 0;
+
+        if (isValid) {
+            setMapPosition([latParam, lngParam]);
+        } else if (geolocationPosition) {
+            setMapPosition([geolocationPosition.lat, geolocationPosition.lng]);
+        } else {
+            setMapPosition(defaultPosition);
+        }
+    }, [searchParams, geolocationPosition]);
+
+    useEffect(() => {
+        if (geolocationPosition) {
+            setMapPosition(prev => {
+                const [prevLat, prevLng] = prev;
+                if (
+                    prevLat !== geolocationPosition.lat ||
+                    prevLng !== geolocationPosition.lng
+                ) {
+                    return [geolocationPosition.lat, geolocationPosition.lng];
+                }
+                return prev;
+            });
+        }
+    }, [geolocationPosition]);
+
 
     return (
         <div className={styles.mapContainer}>
+            <Button variant="position" onClick={getPosition}>
+                {isLoadingPosition ? "Yükleniyor" : "Konumunuz"}
+            </Button>
             <MapContainer
                 center={mapPosition}
                 zoom={isValidCoords ? 13 : 6}
@@ -63,9 +111,10 @@ const Map = () => {
                     </Marker>
                 ))}
 
+                {mapPosition && (
+                    <ChangeMapCenter lat={mapPosition[0]} lng={mapPosition[1]} />
+                )}
 
-
-                {isValidCoords && <ChangeMapCenter lat={lat} lng={lng} />}
                 <DeleteClick />
             </MapContainer>
         </div>
