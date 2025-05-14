@@ -1,4 +1,4 @@
-import { useEffect, useReducer, createContext } from "react";
+import { useEffect, useReducer, useCallback, useMemo, createContext } from "react";
 
 const BASE_URL = "http://localhost:8000";
 
@@ -7,62 +7,66 @@ const CitiesContext = createContext();
 const initialState = {
     cities: [],
     isLoading: false,
+    currentCity: {},
 };
 
-const reducer = (state, action) => {
+function reducer(state, action) {
     switch (action.type) {
         case "LOADING":
-            return { ...state, isLoading: true };
+            return { ...state, isLoading: true, currentCity: {} };
 
-        case "SET_DATA": {
-            return {
-                ...state,
-                cities: action.payload,
-                isLoading: false,
-            };
-        }
+        case "SET_DATA":
+            return { ...state, cities: action.payload, isLoading: false };
+
+        case "GET_CITY":
+            return { ...state, currentCity: action.payload, isLoading: false };
+
         case "ERROR":
-            return {
-                ...state,
-                cities: [],
-                countries: [],
-                isLoading: false,
-            };
+            return { ...state, cities: [], currentCity: {}, isLoading: false };
 
         default:
             return state;
     }
-};
+}
 
-const CitiesProvider = ({ children }) => {
-    const [{ cities, isLoading }, dispatch] = useReducer(reducer, initialState);
+function CitiesProvider({ children }) {
+    const [{ cities, currentCity, isLoading }, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
-        const fetchCities = async () => {
+        (async () => {
             dispatch({ type: "LOADING" });
             try {
                 const res = await fetch(`${BASE_URL}/cities`);
                 const data = await res.json();
                 dispatch({ type: "SET_DATA", payload: data });
-            } catch (error) {
-                console.error("Fetch error:", error);
-                dispatch({ type: "ERROR" });
-            }
-        };
+            } catch (err) {
+                console.error(err);
 
-        fetchCities();
+            }
+        })();
     }, []);
 
-    const values = {
-        cities,
-        isLoading,
-    };
+    const getCity = useCallback(async (id) => {
+        dispatch({ type: "LOADING" });
+        try {
+            const res = await fetch(`${BASE_URL}/cities/${id}`);
+            if (!res.ok) throw new Error(`City with ID ${id} not found`);
 
-    return (
-        <CitiesContext.Provider value={values}>
-            {children}
-        </CitiesContext.Provider>
+            const data = await res.json();
+            dispatch({ type: "GET_CITY", payload: data });
+        } catch (err) {
+            console.error(err);
+
+        }
+    }, []);
+
+    const value = useMemo(
+        () => ({ cities, isLoading, currentCity, getCity }),
+        [cities, isLoading, currentCity, getCity]
     );
-};
+
+    return <CitiesContext.Provider value={value}>{children}</CitiesContext.Provider>;
+}
+
 
 export { CitiesProvider, CitiesContext };
