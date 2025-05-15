@@ -14,6 +14,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useCities } from "../contexts/hooks/useCities";
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router-dom";
+
 
 
 export function convertToEmoji(countryCode) {
@@ -33,6 +35,7 @@ function Form() {
   const [lat, lng] = useUrlPosition()
   const [isLoadingGeocoding, setIsLoadingGeocoding] = useState()
   const [geoCodingErr, setGeoCodingErr] = useState("")
+  const navigate = useNavigate()
 
   const { createCity, isLoading } = useCities()
 
@@ -63,15 +66,15 @@ function Form() {
     fetchCityData()
   }, [lat, lng])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!cityName || !date) return;
 
     const newData = { cityName, date, notes, country, emoji, position: { lat, lng }, id: uuidv4() };
 
-    console.log(newData);
-    createCity(newData)
+    await createCity(newData)
+    navigate("/app/cities")
   };
 
 

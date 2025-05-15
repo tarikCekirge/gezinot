@@ -23,7 +23,13 @@ function reducer(state, action) {
 
         case "ADD_CITY":
             return { ...state, cities: [...state.cities, action.payload], currentCity: action.payload, isLoading: false };
-
+        case "DELETE_CITY":
+            return {
+                ...state,
+                cities: state.cities.filter(city => city.id !== action.payload),
+                currentCity: {},
+                isLoading: false,
+            };
 
         case "ERROR":
             return { ...state, cities: [], currentCity: {}, isLoading: false };
@@ -82,9 +88,21 @@ function CitiesProvider({ children }) {
         }
     }, []);
 
+    const deleteCity = useCallback(async (id) => {
+        dispatch({ type: "LOADING" });
+        try {
+            await fetch(`${BASE_URL}/cities/${id}`, {
+                method: "DELETE"
+            });
+            dispatch({ type: "DELETE_CITY", payload: id });
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
+
     const value = useMemo(
-        () => ({ cities, isLoading, currentCity, getCity, createCity }),
-        [cities, isLoading, currentCity, getCity, createCity]
+        () => ({ cities, isLoading, currentCity, getCity, createCity, deleteCity }),
+        [cities, isLoading, currentCity, getCity, createCity, deleteCity]
     );
 
     return <CitiesContext.Provider value={value}>{children}</CitiesContext.Provider>;
