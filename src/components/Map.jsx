@@ -6,6 +6,7 @@ import { useCities } from '../contexts/hooks/useCities';
 import { useGeolocation } from '../hooks/useGeoLocation';
 import Button from './Button';
 import { useState } from 'react';
+import { useUrlPosition } from '../hooks/useUrlPosition';
 
 function ChangeMapCenter({ lat, lng }) {
     const map = useMap();
@@ -30,16 +31,17 @@ function DeleteClick() {
 }
 
 const Map = () => {
-
+    const { position: geolocationPosition, getPosition, isLoading: isLoadingPosition } = useGeolocation();
     const defaultPosition = [39.9208, 32.8541];
     const [mapPosition, setMapPosition] = useState(defaultPosition);
     const { cities } = useCities()
 
     const [searchParams] = useSearchParams();
-    const { position: geolocationPosition, getPosition, isLoading: isLoadingPosition } = useGeolocation();
 
-    const latParam = Number(searchParams.get('lat'));
-    const lngParam = Number(searchParams.get('lng'));
+
+    const [mapLat, mapLng] = useUrlPosition()
+    const latParam = Number(mapLat);
+    const lngParam = Number(mapLng);
 
     const isValidParams =
         !isNaN(latParam) &&

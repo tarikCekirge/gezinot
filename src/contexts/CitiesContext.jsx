@@ -21,6 +21,10 @@ function reducer(state, action) {
         case "GET_CITY":
             return { ...state, currentCity: action.payload, isLoading: false };
 
+        case "ADD_CITY":
+            return { ...state, cities: [...state.cities, action.payload], currentCity: action.payload, isLoading: false };
+
+
         case "ERROR":
             return { ...state, cities: [], currentCity: {}, isLoading: false };
 
@@ -60,9 +64,27 @@ function CitiesProvider({ children }) {
         }
     }, []);
 
+
+    const createCity = useCallback(async (newCity) => {
+        dispatch({ type: "LOADING" });
+        try {
+            const res = await fetch(`${BASE_URL}/cities/`, {
+                method: "POST",
+                body: JSON.stringify(newCity),
+                headers: {
+                    'Content-Type': "application/json"
+                }
+            });
+            const data = await res.json();
+            dispatch({ type: "ADD_CITY", payload: data });
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
+
     const value = useMemo(
-        () => ({ cities, isLoading, currentCity, getCity }),
-        [cities, isLoading, currentCity, getCity]
+        () => ({ cities, isLoading, currentCity, getCity, createCity }),
+        [cities, isLoading, currentCity, getCity, createCity]
     );
 
     return <CitiesContext.Provider value={value}>{children}</CitiesContext.Provider>;
