@@ -49,7 +49,6 @@ function Form() {
         setGeoCodingErr("")
         const response = await fetch(`${BASE_URL}?latitude=${lat}&longitude=${lng}`)
         const data = await response.json()
-        console.log(data)
 
         if (!data.countryCode) throw new Error('Görünüşe göre bir şehre tıklamadınız. Bir şehre tıklayın.')
         setCityName(data.city || data.locality || "")

@@ -16,7 +16,7 @@ export default function Homepage() {
         <h2>
           Aklınıza gelebilecek her şehre ayak izlerinizi takip eden bir dünya haritası. Harika deneyimlerinizi asla unutmayın ve arkadaşlarınıza dünyayı nasıl dolaştığınızı gösterin.
         </h2>
-        <Link to='app' className="cta">Keşfetmeye Başla</Link>
+        <Link to='/login' className="cta">Keşfetmeye Başla</Link>
       </section>
     </main>
   );
