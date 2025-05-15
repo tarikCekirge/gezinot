@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useEffect, useReducer, useCallback, useMemo, createContext } from "react";
 
 const BASE_URL = "http://localhost:8000";
@@ -9,7 +8,6 @@ const initialState = {
     cities: [],
     isLoading: false,
     currentCity: {},
-    error: ""
 };
 
 function reducer(state, action) {
@@ -33,11 +31,11 @@ function reducer(state, action) {
                 isLoading: false,
             };
 
-        case "REJECTED":
-            return { ...state, isLoading: false, error: action.payload };
+        case "ERROR":
+            return { ...state, cities: [], currentCity: {}, isLoading: false };
 
-        default: throw new Error("Unkown action type");
-
+        default:
+            return state;
     }
 }
 
@@ -53,30 +51,24 @@ function CitiesProvider({ children }) {
                 dispatch({ type: "SET_DATA", payload: data });
             } catch (err) {
                 console.error(err);
-                dispatch({ type: "REJECTED", payload: err.message });
 
             }
         })();
     }, []);
 
-
-    const lastFetchedId = useRef(null);
-
     const getCity = useCallback(async (id) => {
-        if (Number(id) === Number(lastFetchedId.current)) return;
         dispatch({ type: "LOADING" });
         try {
             const res = await fetch(`${BASE_URL}/cities/${id}`);
             if (!res.ok) throw new Error(`City with ID ${id} not found`);
 
             const data = await res.json();
-            lastFetchedId.current = data.id;
             dispatch({ type: "GET_CITY", payload: data });
         } catch (err) {
-            dispatch({ type: "REJECTED", payload: err.message });
+            console.error(err);
+
         }
     }, []);
-
 
 
     const createCity = useCallback(async (newCity) => {
@@ -92,7 +84,7 @@ function CitiesProvider({ children }) {
             const data = await res.json();
             dispatch({ type: "ADD_CITY", payload: data });
         } catch (err) {
-            dispatch({ type: "REJECTED", payload: err.message });
+            console.error(err);
         }
     }, []);
 
@@ -104,7 +96,7 @@ function CitiesProvider({ children }) {
             });
             dispatch({ type: "DELETE_CITY", payload: id });
         } catch (err) {
-            dispatch({ type: "REJECTED", payload: err.message });
+            console.error(err);
         }
     }, []);
 

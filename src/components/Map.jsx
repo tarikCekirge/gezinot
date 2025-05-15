@@ -53,8 +53,6 @@ const Map = () => {
     const lat = isValidParams ? latParam : defaultPosition[0];
     const lng = isValidParams ? lngParam : defaultPosition[1];
 
-    console.log(lat, lng)
-
 
     const isValidCoords = !isNaN(lat) && !isNaN(lng);
 

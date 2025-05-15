@@ -1,7 +1,8 @@
+import styles from './PageNotFound.module.css'
 export default function PageNotFound() {
   return (
-    <div>
-      <h1>Sayfa Buulnamadı :(</h1>
+    <div className={styles.error}>
+      <h1>Sayfa Bulunamadı :(</h1>
     </div>
   );
 }
