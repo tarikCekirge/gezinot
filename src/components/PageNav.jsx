@@ -21,7 +21,7 @@ const PageNav = () => {
                     <NavLink to='/pricing'>Fiyatlar</NavLink>
                 </li>
                 <li>
-                    <NavLink to='/product'>Ürünler</NavLink>
+                    <NavLink to='/product'>Gezi Not Hakkında</NavLink>
                 </li>
                 <li>
                     {!isAuthenticated ? <NavLink to='/login' className={styles.ctaLink}>Giriş</NavLink> : <Button variant={'primary'} onClick={handleClick}>Çıkış</Button>
